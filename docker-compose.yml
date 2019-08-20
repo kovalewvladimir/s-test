@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+  server-test:
+    image: kovalewvladimir/test-server
+    ports:
+      - 8080:8080
+    environment: 
+      MONGODB_HOST: mongo
+    depends_on: 
+      - mongo
+
+  swagger:
+    image:
+      swaggerapi/swagger-ui:v3.23.5
+    ports:
+      - 3000:8080
+    environment:
+      - SWAGGER_JSON=/api.yml
+    volumes:
+      - ./docs/api.yml:/api.yml:ro

@@ -1,0 +1,1 @@
+docker build -t kovalewvladimir/test-server .

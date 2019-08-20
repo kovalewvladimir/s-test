@@ -1,0 +1,303 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "Selectel test"
+  contact:
+    email: "kovalew.vladimir@gmail.com"
+
+servers:
+  - url: http://vekdev:8080/api/v1.0
+    description: test server
+  - url: http://localhost:8080/api/v1.0
+    description: Локальный сервер
+
+paths:
+  /auth/registration:
+    post:
+      summary: Registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/user'
+      tags:
+        - auth
+      responses:
+        201:
+          description: User is registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username: 
+                    type: string
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        409:
+          description: User already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/defaultError'
+        500:
+          $ref: '#/components/responses/serverError'
+
+  /auth/token:
+    get:
+      summary: Generate auth token
+      security:
+        - basicAuth: []
+      tags:
+        - auth
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: 
+                    type: string
+                  duration:
+                    type: integer
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        500:
+          $ref: '#/components/responses/serverError'
+  
+  
+  /joke/list:
+    get:
+      summary: List all jokes user
+      security:
+        - basicAuth: []
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    joke:
+                      type: string
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        500:
+          $ref: '#/components/responses/serverError'
+
+  /joke/:
+    post:
+      summary: Create joke
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                joke: 
+                  type: string
+      security:
+        - basicAuth: []
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/joke'
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        500:
+          $ref: '#/components/responses/serverError'
+
+  /joke/generate:
+    post:
+      summary: Generate joke
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                save:
+                  type: boolean
+                  default: true
+      security:
+        - basicAuth: []
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/joke'
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        500:
+          $ref: '#/components/responses/serverError'
+
+  /joke/{id}:
+    get:
+      summary: Get joke user
+      parameters:
+        - $ref: '#/components/parameters/pathObjectId'
+      security:
+        - basicAuth: []
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/joke'
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        404:
+          $ref: '#/components/responses/notFoundJokeError'
+        500:
+          $ref: '#/components/responses/serverError'
+    put:
+      summary: Change joke user
+      parameters:
+        - $ref: '#/components/parameters/pathObjectId'
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                joke:
+                  type: string
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/joke'
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        404:
+          $ref: '#/components/responses/notFoundJokeError'
+        500:
+          $ref: '#/components/responses/serverError'
+    delete:
+      summary: Delete joke user
+      parameters:
+        - $ref: '#/components/parameters/pathObjectId'
+      security:
+        - basicAuth: []
+      tags:
+        - joke
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delete: 
+                    type: boolean
+                    default: true
+        400:
+          $ref: '#/components/responses/incorrectInputError'
+        401:
+          $ref: '#/components/responses/unauthorizedError'
+        404:
+          $ref: '#/components/responses/notFoundJokeError'
+        500:
+          $ref: '#/components/responses/serverError'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  parameters:
+    pathObjectId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        minLength: 24
+        maxLength: 24
+  schemas:
+    defaultError:
+      type: object
+      properties:
+        error:
+          type: string
+    user: 
+      type: object
+      properties:
+        username: 
+          type: string
+          default: user
+        password: 
+          type: string
+          default: password
+    joke:            
+      type: object
+      properties:
+        id:
+          type: string
+        joke:
+          type: string
+  responses:
+    unauthorizedError:
+      description: Authentication information is missing or invalid
+      headers:
+        WWW_Authenticate:
+          schema:
+            type: string
+    incorrectInputError:
+      description: Incorrect input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/defaultError'
+    notFoundJokeError:
+      description: Not found joke 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/defaultError'
+    serverError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/defaultError'
