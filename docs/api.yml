@@ -6,7 +6,7 @@ info:
     email: "kovalew.vladimir@gmail.com"
 
 servers:
-  - url: http://vekdev:8080/api/v1.0
+  - url: http://vekdev.ru:8080/api/v1.0
     description: test server
   - url: http://localhost:8080/api/v1.0
     description: Локальный сервер
