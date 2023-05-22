@@ -1,6 +1,6 @@
 mongoengine==0.18.2
 flask==1.1.1
 Flask-HTTPAuth==3.3.0
-requests==2.22.0
+requests==2.31.0
 passlib==1.7.1
 flask-json-schema==0.0.5
